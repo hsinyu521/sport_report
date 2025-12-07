@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hsin 專屬運動紀錄平台</title>
+    <link rel="icon" type="image/png" href="./pink.png">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* 黃色溫暖運動風 */
+            --bg-main: #FFF4CC;
+            --bg-card: #FFFBEA;
+            --yellow: #FFD43B;
+            --orange: #FFA94D;
+            --text-dark: #6B4E16;
+            --border: #FFE8A3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: var(--bg-main);
+            min-height: 100vh;
+            color: var(--text-dark);
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        /* 頂部 */
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--yellow);
+            color: var(--text-dark);
+            font-weight: 900;
+            font-size: 1.3rem;
+            position: sticky;
+            top: 0;
+            z-index: 30;
+        }
+
+        /* 容器 */
+        .container {
+            padding: 20px;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* 表單卡片 */
+        .form-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            border: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--orange);
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: white;
+            font-size: 1rem;
+        }
+
+        .switch-row {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 12px 0;
+            background: var(--orange);
+            border: none;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            color: white;
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #ff922b;
+        }
+
+        /* 運動卡片 */
+        .record-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            padding: 15px;
+            border-radius: 16px;
+            margin-bottom: 15px;
+        }
+
+        .record-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 900;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .record-content {
+            margin-top: 10px;
+            display: none;
+            line-height: 1.6;
+            padding-left: 5px;
+        }
+
+        .btn-row {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            flex: 1;
+            padding: 10px 0;
+            border-radius: 10px;
+            color: white;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: #74c0fc;
+        }
+
+        .delete-btn {
+            background: #ff6b6b;
+        }
+
+        /* AI 回饋 */
+        .ai-box {
+            background: #fff9db;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 15px;
+            border: 2px solid #ffe8a3;
+        }
+
+        .ai-title {
+            font-weight: 900;
+            color: var(--orange);
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status-bar">🏋️ 運動紀錄本</div>
+
+    <div class="container">
+
+        <!-- 新增運動表單 -->
+        <div class="form-card">
+            <div class="form-title">新增今日運動</div>
+
+            <label>運動項目</label>
+            <input id="exerciseName" placeholder="例如：深蹲、瑜珈、慢跑...">
+
+            <label>紀錄方式</label>
+            <select id="modeSwitch">
+                <option value="minutes">分鐘</option>
+                <option value="times">次數</option>
+            </select>
+
+            <label id="amountLabel">運動分鐘</label>
+            <input id="exerciseAmount" type="number" min="1" placeholder="例如：30">
+
+            <button onclick="addExercise()">加入紀錄</button>
+        </div>
+
+        <!-- AI 建議 -->
+        <div id="aiOutput" class="ai-box" style="display:none;">
+            <div class="ai-title">🔥 今日 AI 鼓勵與技巧</div>
+            <div id="aiText"></div>
+        </div>
+
+        <!-- 歷史紀錄 -->
+        <h2 style="margin:20px 0 10px; font-weight:900;">📅 運動紀錄</h2>
+        <div id="recordList"></div>
+
+    </div>
+
+    <script>
+        const recordListEl = document.getElementById("recordList");
+        const modeSwitch = document.getElementById("modeSwitch");
+        const amountLabel = document.getElementById("amountLabel");
+
+        let records = JSON.parse(localStorage.getItem("records") || "[]");
+
+        modeSwitch.addEventListener("change", () => {
+            amountLabel.textContent = modeSwitch.value === "minutes"
+                ? "運動分鐘"
+                : "運動次數";
+        });
+
+        /* --- 新增紀錄 --- */
+        function addExercise() {
+            const name = document.getElementById("exerciseName").value.trim();
+            const amount = document.getElementById("exerciseAmount").value.trim();
+            const mode = modeSwitch.value;
+
+            if (!name || !amount) return alert("請完整輸入內容！");
+
+            const newRecord = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString("zh-TW"),
+                name,
+                amount,
+                mode
+            };
+
+            records.unshift(newRecord);
+            localStorage.setItem("records", JSON.stringify(records));
+            renderRecords();
+            callAI(newRecord);
+        }
+
+        /* --- 渲染紀錄 --- */
+        function renderRecords() {
+            recordListEl.innerHTML = "";
+
+            records.forEach(r => {
+                const card = document.createElement("div");
+                card.className = "record-card";
+
+                card.innerHTML = `
+                    <div class="record-header" onclick="toggleContent(${r.id})">
+                        <div>${r.date}</div>
+                        <div>${r.name}</div>
+                    </div>
+
+                    <div class="record-content" id="content-${r.id}">
+                        <div>運動：${r.name}</div>
+                        <div>量：${r.amount} ${r.mode === "minutes" ? "分鐘" : "次"}</div>
+
+                        <div class="btn-row">
+                            <button class="edit-btn" onclick="editRecord(${r.id})">編輯</button>
+                            <button class="delete-btn" onclick="deleteRecord(${r.id})">刪除</button>
+                        </div>
+                    </div>
+                `;
+
+                recordListEl.appendChild(card);
+            });
+        }
+
+        function toggleContent(id) {
+            const el = document.getElementById(`content-${id}`);
+            el.style.display = el.style.display === "block" ? "none" : "block";
+        }
+
+        /* --- 編輯紀錄 --- */
+        function editRecord(id) {
+            const r = records.find(x => x.id === id);
+            const newName = prompt("修改運動項目：", r.name);
+            if (!newName) return;
+            const newAmount = prompt("修改數值：", r.amount);
+            if (!newAmount) return;
+
+            r.name = newName;
+            r.amount = newAmount;
+
+            localStorage.setItem("records", JSON.stringify(records));
+            renderRecords();
+        }
+
+        /* --- 刪除紀錄 --- */
+        function deleteRecord(id) {
+            if (!confirm("確定要刪除嗎？")) return;
+            records = records.filter(x => x.id !== id);
+            localStorage.setItem("records", JSON.stringify(records));
+            renderRecords();
+        }
+
+/* --- AI 鼓勵語句：改用本地 30 句短句隨機抽取 --- */
+const encouragingMessages = [
+    "你今天做得很棒！",
+    "再前進一點點就更強了！",
+    "堅持的你最酷！",
+    "每一步都算數！",
+    "累了表示你在變強！",
+    "今天的努力很值得！",
+    "你的進步比你想的多！",
+    "只要開始就是贏！",
+    "你比昨天更靠前了！",
+    "保持專注，力量在累積！",
+    "你的努力正在被看見！",
+    "再一點點就達成目標！",
+    "慢慢來也沒關係！",
+    "今天的堅持很重要！",
+    "你做得比你想像得好！",
+    "動起來的你很耀眼！",
+    "別小看每次的累積！",
+    "今天的你很值得被稱讚！",
+    "你的意志力超強！",
+    "你正把自己變得更好！",
+    "這一步是好開始！",
+    "你的身體會感謝你！",
+    "保持節奏就很好！",
+    "你正在寫下好習慣！",
+    "今天的你真的很努力！",
+    "你值得為自己驕傲！",
+    "做得好，繼續保持！",
+    "今天又是成功的一步！",
+    "你離目標越來越近了！",
+    "做得超棒！繼續加油！"
+];
+
+/* --- 今日技巧小提醒（固定一句） --- */
+function getTipText(record) {
+    if (record.mode === "minutes") {
+        return "保持穩定呼吸與節奏更有效率喔！";
+    } else {
+        return "注意動作姿勢，品質比數量更重要！";
+    }
+}
+
+/* --- AI 替換：改成本地隨機文字 --- */
+function callAI(record) {
+    const randomIndex = Math.floor(Math.random() * encouragingMessages.length);
+    const message = encouragingMessages[randomIndex];
+    const tip = getTipText(record);
+
+    const finalText = `${message}  ${tip}`;
+
+    document.getElementById("aiText").textContent = finalText;
+    document.getElementById("aiOutput").style.display = "block";
+}
+
+
+        renderRecords();
+    </script>
+</body>
+
+</html>
